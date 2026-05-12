@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +13,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useAvatar } from "../../contexts/AvatarContext";
 import { useTheme } from "../../contexts/ThemeContext";
 
+import capivara from "../../assets/avatars/capivara.webp";
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -22,8 +25,39 @@ export default function Dashboard() {
 
   const progress = 50;
 
-  const startChallenge = (id) => {
-    router.push(`/challenge/${id}`);
+  const avatarMap = {
+    owl: "🦉",
+    cat: "🐱",
+    dog: "🐶",
+    panda: "🐼",
+    fox: "🦊",
+    frog: "🐸",
+    monkey: "🐵",
+    koala: "🐨",
+    capybara: capivara,
+
+    "🦉": "🦉",
+    "🐱": "🐱",
+    "🐶": "🐶",
+    "🐼": "🐼",
+    "🦊": "🦊",
+    "🐸": "🐸",
+    "🐵": "🐵",
+    "🐨": "🐨",
+  };
+
+  const renderAvatar = () => {
+    const avatar = avatarMap[selectedAnimal] || "🦉";
+
+    if (typeof avatar === "string") {
+      return <Text style={styles.avatarEmoji}>{avatar}</Text>;
+    }
+
+    return <Image source={avatar} style={styles.avatarImage} />;
+  };
+
+  const startLevel = (route) => {
+    router.push(route);
   };
 
   const challengeSections = {
@@ -31,6 +65,7 @@ export default function Dashboard() {
       {
         level: "Fácil",
         color: "#58cc02",
+        route: "/awschalenge/facil",
         challenges: [
           {
             id: 1,
@@ -49,6 +84,7 @@ export default function Dashboard() {
       {
         level: "Médio",
         color: "#ffb020",
+        route: "/awschalenge/medio",
         challenges: [
           {
             id: 2,
@@ -67,6 +103,7 @@ export default function Dashboard() {
       {
         level: "Difícil",
         color: "#ff4b4b",
+        route: "/awschalenge/dificil",
         challenges: [
           {
             id: 3,
@@ -88,6 +125,7 @@ export default function Dashboard() {
       {
         level: "Fácil",
         color: "#58cc02",
+        route: "/expochalenge/facil",
         challenges: [
           {
             id: 4,
@@ -106,6 +144,7 @@ export default function Dashboard() {
       {
         level: "Médio",
         color: "#ffb020",
+        route: "/expochalenge/medio",
         challenges: [
           {
             id: 5,
@@ -124,6 +163,7 @@ export default function Dashboard() {
       {
         level: "Difícil",
         color: "#ff4b4b",
+        route: "/expochalenge/dificil",
         challenges: [
           {
             id: 6,
@@ -160,9 +200,7 @@ export default function Dashboard() {
           </Text>
         </View>
 
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarEmoji}>{selectedAnimal}</Text>
-        </View>
+        <View style={styles.avatarCircle}>{renderAvatar()}</View>
       </View>
 
       <View style={[styles.mainCard, { backgroundColor: theme.card }]}>
@@ -224,10 +262,7 @@ export default function Dashboard() {
 
       <View style={styles.tabs}>
         <TouchableOpacity
-          style={[
-            styles.tabButton,
-            selectedTab === "AWS" && styles.activeTab,
-          ]}
+          style={[styles.tabButton, selectedTab === "AWS" && styles.activeTab]}
           onPress={() => setSelectedTab("AWS")}
         >
           <Text
@@ -241,10 +276,7 @@ export default function Dashboard() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.tabButton,
-            selectedTab === "Expo" && styles.activeTab,
-          ]}
+          style={[styles.tabButton, selectedTab === "Expo" && styles.activeTab]}
           onPress={() => setSelectedTab("Expo")}
         >
           <Text
@@ -261,10 +293,7 @@ export default function Dashboard() {
       {challengeSections[selectedTab].map((levelData) => (
         <View key={levelData.level} style={styles.levelContainer}>
           <View
-            style={[
-              styles.levelBadge,
-              { backgroundColor: levelData.color },
-            ]}
+            style={[styles.levelBadge, { backgroundColor: levelData.color }]}
           >
             <Text style={styles.levelText}>{levelData.level}</Text>
           </View>
@@ -312,7 +341,7 @@ export default function Dashboard() {
                   styles.playButton,
                   challenge.blocked && styles.playButtonBlocked,
                 ]}
-                onPress={() => startChallenge(challenge.id)}
+                onPress={() => startLevel(levelData.route)}
               >
                 <Text style={styles.playButtonText}>
                   {challenge.blocked ? "🔒" : "▶"}
@@ -325,7 +354,7 @@ export default function Dashboard() {
 
       <TouchableOpacity
         style={styles.primaryButton}
-        onPress={() => startChallenge(1)}
+        onPress={() => startLevel(challengeSections[selectedTab][0].route)}
       >
         <Text style={styles.primaryText}>INICIAR LIÇÃO</Text>
       </TouchableOpacity>
@@ -376,10 +405,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#58cc02",
+    overflow: "hidden",
   },
 
   avatarEmoji: {
     fontSize: 34,
+  },
+
+  avatarImage: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    resizeMode: "cover",
   },
 
   mainCard: {
