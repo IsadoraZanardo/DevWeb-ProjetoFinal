@@ -11,124 +11,93 @@ import { useTheme } from "../../contexts/ThemeContext";
 
 const challenges = [
   {
-    id: "1",
-    category: "AWS",
-    level: "Fácil",
-    title: "Criando um Bucket S3",
-    emoji: "☁️",
-    xp: 50,
-    topics: [
-      {
-        title: "O que é o Amazon S3?",
-        text: "O Amazon S3 é um serviço da AWS usado para armazenar arquivos na nuvem, como imagens, documentos, backups e vídeos.",
-      },
-      {
-        title: "O que é um bucket?",
-        text: "Bucket é como uma pasta principal dentro do S3. É nele que você guarda seus arquivos.",
-      },
-    ],
-    finalChallenge:
-      "Crie um bucket no Amazon S3 e envie 3 arquivos para dentro dele.",
-  },
-  {
-    id: "2",
-    category: "AWS",
-    level: "Médio",
-    title: "EC2 com servidor web",
-    emoji: "🖥️",
-    xp: 120,
-    topics: [
-      {
-        title: "O que é EC2?",
-        text: "EC2 é uma máquina virtual na nuvem. Ela funciona como um computador Linux ou Windows rodando dentro da AWS.",
-      },
-      {
-        title: "O que é Apache?",
-        text: "Apache é um servidor web usado para exibir páginas HTML pelo navegador.",
-      },
-    ],
-    finalChallenge:
-      "Crie uma EC2 Linux, instale Apache e publique uma página HTML simples.",
-  },
-  {
     id: "3",
     category: "AWS",
     level: "Difícil",
-    title: "EC2 acessando S3",
+    title: "EC2 acessando S3 com IAM Roles",
     emoji: "🔐",
     xp: 250,
-    topics: [
+
+    tutorial: [
       {
-        title: "O que é IAM Role?",
-        text: "IAM Role é uma permissão temporária que você pode entregar para um serviço da AWS acessar outro com segurança.",
+        title: "O que você vai aprender",
+        text:
+          "Neste módulo avançado você irá compreender como funciona a comunicação segura entre serviços da AWS utilizando IAM Roles e políticas de permissão.\n\nO foco principal será permitir que uma instância EC2 consiga acessar buckets S3 de forma segura, sem utilizar credenciais fixas dentro da aplicação.",
       },
       {
-        title: "EC2 + S3",
-        text: "Uma EC2 pode acessar arquivos do S3 sem usar chave secreta, usando uma role com permissão correta.",
+        title: "Cenário do Projeto",
+        text:
+          "Imagine uma aplicação hospedada em uma instância EC2 que precisa ler arquivos armazenados no S3, fazer upload de backups, processar imagens, ler arquivos JSON e hospedar arquivos estáticos.\n\nPor segurança, não é recomendado armazenar AWS Access Key e AWS Secret Key diretamente no servidor.\n\nPara resolver isso utilizamos IAM Roles, Temporary Credentials e Security Policies.",
+      },
+      {
+        title: "O que é IAM?",
+        text:
+          "O IAM é o serviço da AWS responsável por controle de acesso, autenticação, autorização, gerenciamento de usuários e permissões.\n\nCom IAM é possível definir quem pode acessar, o que pode acessar, quais ações pode executar e em quais recursos.",
+      },
+      {
+        title: "O que é uma IAM Role?",
+        text:
+          "Uma IAM Role é uma identidade temporária utilizada por serviços AWS para acessar outros recursos de forma segura.\n\nDiferente de um IAM User, uma Role usa credenciais temporárias e é ideal para serviços como EC2 acessando S3.",
+      },
+      {
+        title: "EC2 utilizando IAM Role",
+        text:
+          "Quando associamos uma IAM Role à EC2, a AWS fornece permissões temporárias automaticamente para a instância.\n\nIsso elimina a necessidade de salvar credenciais no código da aplicação.",
+      },
+      {
+        title: "Segurança em ambientes cloud",
+        text:
+          "Uma das maiores vulnerabilidades em cloud é o vazamento de credenciais AWS.\n\nA abordagem correta é utilizar IAM Roles, aplicar o princípio do menor privilégio, usar permissões específicas e evitar credenciais fixas no código.",
+      },
+      {
+        title: "Estrutura da arquitetura",
+        text:
+          "Usuário\n ↓\nEC2\n ↓\nIAM Role\n ↓\nAWS STS\n ↓\nTemporary Credentials\n ↓\nAmazon S3",
+      },
+      {
+        title: "Etapa 1 — Criando Bucket S3",
+        text:
+          "1. Abrir Amazon S3\n2. Criar bucket\n3. Definir nome único, região, bloqueio público e versionamento opcional.\n\nExemplo: empresa-backups-s3",
+      },
+      {
+        title: "Etapa 2 — Criando a EC2",
+        text:
+          "Configure uma instância usando Amazon Linux, t2.micro, Security Group, chave SSH e IAM Role.",
+      },
+      {
+        title: "Etapa 3 — Criando IAM Role",
+        text:
+          "1. Abrir IAM\n2. Acessar Roles\n3. Clicar em Create Role\n4. Escolher AWS Service\n5. Selecionar EC2",
+      },
+      {
+        title: "Etapa 4 — Criando Política de Permissão",
+        text:
+          "As permissões principais são:\n\n• s3:ListBucket — permite listar arquivos do bucket\n• s3:GetObject — permite baixar arquivos do bucket\n\nARN significa Amazon Resource Name, o identificador único dos recursos AWS.",
+      },
+      {
+        title: "Associando Role à EC2",
+        text:
+          "Após criar a Role:\n\n1. Abrir EC2\n2. Actions\n3. Security\n4. Modify IAM Role\n5. Selecionar a Role criada",
+      },
+      {
+        title: "Testando acesso ao S3",
+        text:
+          "Conecte na EC2:\n\nssh -i chave.pem ec2-user@IP_PUBLICO\n\nComandos úteis:\n\naws s3 ls\naws s3 ls s3://empresa-backups-s3\naws s3 cp s3://empresa-backups-s3/teste.json .",
+      },
+      {
+        title: "Possíveis erros comuns",
+        text:
+          "Access Denied: a Role não possui permissão suficiente.\n\nNoCredentialsError: a EC2 não possui IAM Role associada.\n\nBucket inexistente: nome do bucket incorreto.\n\nRegião incorreta: bucket e EC2 em regiões diferentes.",
+      },
+      {
+        title: "Boas práticas profissionais",
+        text:
+          "Nunca usar credenciais fixas, utilizar IAM Roles, aplicar Least Privilege, utilizar CloudTrail, habilitar criptografia no S3 e monitorar acessos suspeitos.",
       },
     ],
+
     finalChallenge:
-      "Configure uma EC2 com IAM Role e liste arquivos de um bucket S3 pelo terminal.",
-  },
-  {
-    id: "4",
-    category: "Expo",
-    level: "Fácil",
-    title: "Primeira tela no Expo",
-    emoji: "📱",
-    xp: 40,
-    topics: [
-      {
-        title: "View e Text",
-        text: "View é como uma caixa/container. Text é usado para mostrar textos na tela.",
-      },
-      {
-        title: "StyleSheet",
-        text: "StyleSheet serve para organizar os estilos do app, como cor, tamanho, margem e alinhamento.",
-      },
-    ],
-    finalChallenge:
-      "Crie uma tela de boas-vindas com título, subtítulo e botão.",
-  },
-  {
-    id: "5",
-    category: "Expo",
-    level: "Médio",
-    title: "Navegação com Expo Router",
-    emoji: "🧭",
-    xp: 100,
-    topics: [
-      {
-        title: "O que é Expo Router?",
-        text: "Expo Router permite criar navegação usando arquivos e pastas dentro da pasta app.",
-      },
-      {
-        title: "router.push",
-        text: "O router.push envia o usuário para outra tela do aplicativo.",
-      },
-    ],
-    finalChallenge:
-      "Crie uma navegação entre as telas Login, Cadastro e Dashboard.",
-  },
-  {
-    id: "6",
-    category: "Expo",
-    level: "Difícil",
-    title: "Consumindo API no Expo",
-    emoji: "⚡",
-    xp: 200,
-    topics: [
-      {
-        title: "fetch e axios",
-        text: "fetch e axios servem para buscar dados de APIs externas, como PokéAPI ou ViaCEP.",
-      },
-      {
-        title: "useEffect",
-        text: "useEffect permite executar uma ação quando a tela abre, como carregar dados de uma API.",
-      },
-    ],
-    finalChallenge:
-      "Crie uma tela que consuma uma API real e mostre os dados em cards.",
+      "Configure uma EC2 com acesso seguro ao S3 utilizando IAM Roles e políticas de permissão.",
   },
 ];
 
@@ -146,7 +115,10 @@ export default function ChallengeScreen() {
           Desafio não encontrado 😵
         </Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.replace("/(tabs)/dashboard")}
+        >
           <Text style={styles.buttonText}>VOLTAR</Text>
         </TouchableOpacity>
       </View>
@@ -158,7 +130,7 @@ export default function ChallengeScreen() {
       style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.content}
     >
-      <TouchableOpacity onPress={() => router.back()}>
+      <TouchableOpacity onPress={() => router.replace("/(tabs)/dashboard")}>
         <Text style={styles.backText}>← Voltar</Text>
       </TouchableOpacity>
 
@@ -180,7 +152,7 @@ export default function ChallengeScreen() {
         Aprenda antes do desafio
       </Text>
 
-      {challenge.topics.map((topic, index) => (
+      {challenge.tutorial.map((topic, index) => (
         <View
           key={index}
           style={[styles.topicCard, { backgroundColor: theme.card }]}
@@ -207,7 +179,7 @@ export default function ChallengeScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/dashboard")}
+        onPress={() => router.replace("/(tabs)/dashboard")}
       >
         <Text style={styles.buttonText}>MARCAR COMO CONCLUÍDO</Text>
       </TouchableOpacity>

@@ -65,7 +65,7 @@ export default function Dashboard() {
       {
         level: "Fácil",
         color: "#58cc02",
-        route: "/awschalenge/facil",
+        route: "/awschalenge/facil?id=1",
         challenges: [
           {
             id: 1,
@@ -84,7 +84,7 @@ export default function Dashboard() {
       {
         level: "Médio",
         color: "#ffb020",
-        route: "/awschalenge/medio",
+        route: "/awschalenge/medio?id=2",
         challenges: [
           {
             id: 2,
@@ -103,14 +103,14 @@ export default function Dashboard() {
       {
         level: "Difícil",
         color: "#ff4b4b",
-        route: "/awschalenge/dificil",
+        route: "/awschalenge/dificil?id=3",
         challenges: [
           {
             id: 3,
             title: "EC2 acessando S3",
             xp: 250,
             emoji: "🔐",
-            blocked: true,
+            blocked: false,
             topics: [
               "Entenda permissões IAM e roles.",
               "Aprenda como listar arquivos do S3 pela EC2.",

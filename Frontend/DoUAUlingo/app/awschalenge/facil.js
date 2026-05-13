@@ -1,11 +1,11 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { useTheme } from "../../contexts/ThemeContext";
@@ -25,47 +25,30 @@ const challenges = [
         text:
           "Neste módulo você aprenderá os conceitos fundamentais do Amazon S3, o serviço de armazenamento em nuvem da AWS. Você entenderá como os buckets funcionam, como armazenar arquivos na nuvem e como utilizar o S3 para hospedar conteúdos, backups e aplicações web.",
       },
-
       {
         title: "O que é o Amazon S3?",
         text:
-          "O Amazon S3 (Simple Storage Service) é um serviço de armazenamento de objetos da AWS utilizado para guardar arquivos de forma segura, escalável e altamente disponível.\n\nCom ele é possível armazenar:\n• Imagens\n• Vídeos\n• Documentos\n• Backups\n• Sites estáticos\n• Arquivos de aplicações\n\nO S3 é amplamente utilizado por empresas para armazenamento em nuvem devido à sua durabilidade, segurança e facilidade de integração com outros serviços AWS.",
+          "O Amazon S3 (Simple Storage Service) é um serviço de armazenamento de objetos da AWS utilizado para guardar arquivos de forma segura, escalável e altamente disponível.\n\nCom ele é possível armazenar:\n• Imagens\n• Vídeos\n• Documentos\n• Backups\n• Sites estáticos\n• Arquivos de aplicações",
       },
-
       {
         title: "O que é um Bucket?",
         text:
-          "Um bucket é a estrutura principal de armazenamento dentro do Amazon S3. Ele funciona como um grande contêiner onde todos os arquivos, pastas e objetos ficam organizados na nuvem da AWS.\n\nPodemos comparar um bucket a uma pasta principal do computador, porém com recursos avançados de armazenamento em nuvem, segurança, escalabilidade e disponibilidade global.",
+          "Um bucket é a estrutura principal de armazenamento dentro do Amazon S3. Ele funciona como um grande contêiner onde todos os arquivos, pastas e objetos ficam organizados na nuvem da AWS.",
       },
-
-      {
-        title: "Exemplo de estrutura",
-        text:
-          "meu-site-bucket\n├── imagens/\n├── documentos/\n└── index.html\n\nCada bucket possui:\n• Nome único globalmente\n• Região AWS\n• Permissões de acesso\n• Configurações de versionamento e segurança",
-      },
-
       {
         title: "Como criar um Bucket S3",
         text:
-          "Passo 1 — Acessar o serviço S3\n\nEntre no Console AWS\nPesquise por:\nS3\nClique no serviço Amazon S3\n\nPasso 2 — Criar Bucket\nClique em:\nCreate bucket\n\nDefina:\n• Nome do bucket\n• Região AWS\n\nExemplo:\nmeu-primeiro-bucket-aws\n\nPasso 3 — Configurar permissões\nVocê pode escolher:\n• Bucket privado\n• Bucket público\n• Hospedagem de site estático\n\nPara projetos web, normalmente é necessário permitir acesso público aos arquivos.\n\nPasso 4 — Criar bucket\nClique em:\nCreate bucket\n\nPronto! Seu bucket foi criado.",
+          "1. Entre no Console AWS.\n2. Pesquise por S3.\n3. Clique em Create bucket.\n4. Defina nome e região.\n5. Configure permissões.\n6. Clique em Create bucket.",
       },
-
       {
-        title: "Como enviar arquivos para o Bucket",
+        title: "Como enviar arquivos",
         text:
-          "Abra o bucket criado\n\nClique em:\n✅ Upload\n\nAdicione arquivos do computador\n\nClique em:\n✅ Upload\n\nOs arquivos ficarão armazenados na nuvem AWS.",
+          "Abra o bucket criado, clique em Upload, selecione os arquivos do computador e confirme o envio.",
       },
-
       {
-        title: "Hospedando um site no S3",
+        title: "Segurança no S3",
         text:
-          "O S3 também pode ser utilizado para hospedar sites estáticos feitos com:\n\n• HTML\n• CSS\n• JavaScript\n• React/Vite buildado\n\nBasta:\n• Enviar os arquivos\n• Habilitar Static Website Hosting\n• Liberar permissões públicas",
-      },
-
-      {
-        title: "🔐 Segurança no S3",
-        text:
-          "Boas práticas importantes:\n\n• Não deixar buckets públicos sem necessidade\n• Utilizar políticas IAM\n• Ativar versionamento\n• Utilizar criptografia\n• Monitorar acessos",
+          "Boas práticas:\n• Não deixar buckets públicos sem necessidade\n• Utilizar políticas IAM\n• Ativar versionamento\n• Utilizar criptografia\n• Monitorar acessos",
       },
     ],
 
@@ -96,7 +79,6 @@ const challenges = [
         ],
         answer: "Um serviço de armazenamento da AWS",
       },
-
       {
         question: "O que é um bucket?",
         options: [
@@ -106,7 +88,6 @@ const challenges = [
         ],
         answer: "Uma pasta principal do S3",
       },
-
       {
         question: "Qual destas opções pode ser armazenada no S3?",
         options: [
@@ -116,7 +97,6 @@ const challenges = [
         ],
         answer: "Imagens e documentos",
       },
-
       {
         question: "O que é necessário para hospedar um site no S3?",
         options: [
@@ -126,7 +106,6 @@ const challenges = [
         ],
         answer: "Habilitar Static Website Hosting",
       },
-
       {
         question: "Qual é uma boa prática de segurança no S3?",
         options: [
@@ -140,15 +119,30 @@ const challenges = [
   },
 ];
 
+function shuffleArray(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
 export default function ChallengeScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
 
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [completed, setCompleted] = useState(false);
+  const [lockedQuestions, setLockedQuestions] = useState({});
+  const [lives, setLives] = useState(3);
+  const [submitted, setSubmitted] = useState(false);
 
   const challenge = challenges.find((item) => item.id === String(id));
+
+  const shuffledQuestions = useMemo(() => {
+    if (!challenge) return [];
+
+    return challenge.questions.map((question) => ({
+      ...question,
+      options: shuffleArray(question.options),
+    }));
+  }, [challenge]);
 
   if (!challenge) {
     return (
@@ -157,32 +151,59 @@ export default function ChallengeScreen() {
           Desafio não encontrado 😵
         </Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>VOLTAR</Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()}>
+  <Text style={styles.backText}>← Voltar</Text>
+</TouchableOpacity>
       </View>
     );
   }
 
-  const totalQuestions = challenge.questions.length;
+  const totalQuestions = shuffledQuestions.length;
 
-  const correctAnswers = challenge.questions.filter(
+  const correctAnswers = shuffledQuestions.filter(
     (item, index) => selectedAnswers[index] === item.answer
   ).length;
 
-  const allAnswered = Object.keys(selectedAnswers).length === totalQuestions;
-  const canComplete = allAnswered && correctAnswers === totalQuestions;
+  const answeredQuestions = Object.keys(selectedAnswers).length;
+  const allAnswered = answeredQuestions === totalQuestions;
+
+  const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+  const approved = percentage >= 75;
 
   const selectAnswer = (questionIndex, option) => {
+    if (submitted || lockedQuestions[questionIndex]) return;
+
+    const question = shuffledQuestions[questionIndex];
+    const isCorrect = option === question.answer;
+
     setSelectedAnswers((prev) => ({
       ...prev,
       [questionIndex]: option,
     }));
+
+    if (isCorrect) {
+      setLockedQuestions((prev) => ({
+        ...prev,
+        [questionIndex]: true,
+      }));
+
+      return;
+    }
+
+    if (lives > 0) {
+      setLives((prev) => prev - 1);
+      return;
+    }
+
+    setLockedQuestions((prev) => ({
+      ...prev,
+      [questionIndex]: true,
+    }));
   };
 
-  const finishChallenge = () => {
-    if (!canComplete) return;
-    setCompleted(true);
+  const submitChallenge = () => {
+    if (!allAnswered || submitted) return;
+    setSubmitted(true);
   };
 
   return (
@@ -206,6 +227,18 @@ export default function ChallengeScreen() {
         </Text>
 
         <Text style={styles.xp}>+{challenge.xp} XP</Text>
+      </View>
+
+      <View style={styles.statusRow}>
+        <View style={styles.lifeCard}>
+          <Text style={styles.lifeText}>Vidas: {"❤️".repeat(lives)}</Text>
+        </View>
+
+        <View style={styles.lifeCard}>
+          <Text style={styles.lifeText}>
+            Respondidas: {answeredQuestions}/{totalQuestions}
+          </Text>
+        </View>
       </View>
 
       <Text style={[styles.sectionTitle, { color: theme.text }]}>
@@ -235,11 +268,32 @@ export default function ChallengeScreen() {
         <Text style={styles.finalText}>{challenge.finalChallenge}</Text>
       </View>
 
+      <View style={[styles.topicCard, { backgroundColor: theme.card }]}>
+        <Text style={[styles.topicTitle, { color: theme.text }]}>
+          Requisitos
+        </Text>
+
+        {challenge.requirements.map((item, index) => (
+          <Text
+            key={index}
+            style={[styles.topicText, { color: theme.subtext }]}
+          >
+            ✅ {item}
+          </Text>
+        ))}
+      </View>
+
       <Text style={[styles.sectionTitle, { color: theme.text }]}>
-        Responda para concluir
+        Avaliação
       </Text>
 
-      {challenge.questions.map((item, questionIndex) => (
+      <Text style={[styles.helpText, { color: theme.subtext }]}>
+        Você precisa acertar pelo menos 75%. As alternativas aparecem em ordem
+        aleatória. Você possui 3 vidas para corrigir respostas erradas antes da
+        resposta ficar travada.
+      </Text>
+
+      {shuffledQuestions.map((item, questionIndex) => (
         <View
           key={questionIndex}
           style={[styles.questionCard, { backgroundColor: theme.card }]}
@@ -251,15 +305,19 @@ export default function ChallengeScreen() {
           {item.options.map((option) => {
             const selected = selectedAnswers[questionIndex] === option;
             const isCorrect = option === item.answer;
+            const locked = lockedQuestions[questionIndex];
 
             return (
               <TouchableOpacity
                 key={option}
+                disabled={submitted || locked}
                 style={[
                   styles.optionButton,
                   selected && styles.selectedOption,
-                  selected && isCorrect && styles.correctOption,
-                  selected && !isCorrect && styles.wrongOption,
+                  selected && locked && isCorrect && styles.correctOption,
+                  selected && locked && !isCorrect && styles.wrongOption,
+                  submitted && selected && isCorrect && styles.correctOption,
+                  submitted && selected && !isCorrect && styles.wrongOption,
                 ]}
                 onPress={() => selectAnswer(questionIndex, option)}
               >
@@ -267,29 +325,52 @@ export default function ChallengeScreen() {
               </TouchableOpacity>
             );
           })}
+
+          {lockedQuestions[questionIndex] && (
+            <Text style={styles.lockedText}>Resposta travada 🔒</Text>
+          )}
         </View>
       ))}
 
-      <Text style={[styles.resultText, { color: theme.subtext }]}>
-        Acertos: {correctAnswers}/{totalQuestions}
-      </Text>
+      {submitted && (
+        <View
+          style={[
+            styles.resultCard,
+            approved ? styles.approvedCard : styles.failedCard,
+          ]}
+        >
+          <Text style={styles.resultTitle}>
+            {approved ? "Aprovado! 🏆" : "Reprovado 😵"}
+          </Text>
 
-      {completed && (
-        <View style={styles.completedCard}>
-          <Text style={styles.completedTitle}>Módulo concluído! 🏆</Text>
-          <Text style={styles.completedText}>
-            Boa! Você concluiu esse desafio e ganhou {challenge.xp} XP.
+          <Text style={styles.resultInfo}>
+            Acertos: {correctAnswers}/{totalQuestions}
+          </Text>
+
+          <Text style={styles.resultInfo}>Nota: {percentage}%</Text>
+
+          <Text style={styles.resultDescription}>
+            {approved
+              ? `Boa! Você atingiu a média mínima e ganhou ${challenge.xp} XP.`
+              : "Você precisa atingir pelo menos 75% para concluir este módulo."}
           </Text>
         </View>
       )}
 
       <TouchableOpacity
-        disabled={!canComplete}
-        style={[styles.button, !canComplete && styles.disabledButton]}
-        onPress={finishChallenge}
+        disabled={!allAnswered || submitted}
+        style={[
+          styles.button,
+          (!allAnswered || submitted) && styles.disabledButton,
+        ]}
+        onPress={submitChallenge}
       >
         <Text style={styles.buttonText}>
-          {canComplete ? "CONCLUIR MÓDULO" : "RESPONDA TUDO CORRETAMENTE"}
+          {submitted
+            ? "AVALIAÇÃO ENVIADA"
+            : allAnswered
+            ? "ENVIAR RESPOSTAS"
+            : "RESPONDA TODAS AS QUESTÕES"}
         </Text>
       </TouchableOpacity>
     </ScrollView>
@@ -319,7 +400,7 @@ const styles = StyleSheet.create({
     borderColor: "#e5e5e5",
     borderBottomWidth: 6,
     borderBottomColor: "#d1d1d1",
-    marginBottom: 24,
+    marginBottom: 18,
   },
 
   emoji: {
@@ -346,10 +427,39 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
+  statusRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 20,
+  },
+
+  lifeCard: {
+    flex: 1,
+    backgroundColor: "#d7ffb8",
+    padding: 12,
+    borderRadius: 16,
+    alignItems: "center",
+    borderBottomWidth: 4,
+    borderBottomColor: "#46a302",
+  },
+
+  lifeText: {
+    color: "#2f7d00",
+    fontWeight: "900",
+    fontSize: 13,
+  },
+
   sectionTitle: {
     fontSize: 22,
     fontWeight: "900",
     marginBottom: 14,
+  },
+
+  helpText: {
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 21,
+    marginBottom: 16,
   },
 
   topicCard: {
@@ -377,7 +487,7 @@ const styles = StyleSheet.create({
 
   topicText: {
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 22,
     fontWeight: "700",
   },
 
@@ -386,7 +496,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 22,
     marginTop: 10,
-    marginBottom: 24,
+    marginBottom: 20,
     borderBottomWidth: 6,
     borderBottomColor: "#46a302",
   },
@@ -437,10 +547,12 @@ const styles = StyleSheet.create({
 
   selectedOption: {
     borderColor: "#58cc02",
+    backgroundColor: "#eaffdc",
   },
 
   correctOption: {
     backgroundColor: "#d7ffb8",
+    borderColor: "#58cc02",
   },
 
   wrongOption: {
@@ -454,34 +566,53 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 
-  resultText: {
-    fontSize: 15,
+  lockedText: {
+    marginTop: 4,
+    color: "#ff4b4b",
+    fontSize: 13,
     fontWeight: "900",
-    marginBottom: 14,
   },
 
-  completedCard: {
-    backgroundColor: "#d7ffb8",
+  resultCard: {
     borderRadius: 22,
-    padding: 18,
+    padding: 20,
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: "#58cc02",
     borderBottomWidth: 5,
+  },
+
+  approvedCard: {
+    backgroundColor: "#d7ffb8",
+    borderColor: "#58cc02",
     borderBottomColor: "#46a302",
   },
 
-  completedTitle: {
-    color: "#2f7d00",
-    fontSize: 20,
-    fontWeight: "900",
-    marginBottom: 8,
+  failedCard: {
+    backgroundColor: "#ffd6d6",
+    borderColor: "#ff4b4b",
+    borderBottomColor: "#cc3838",
   },
 
-  completedText: {
-    color: "#2f7d00",
+  resultTitle: {
+    fontSize: 22,
+    fontWeight: "900",
+    marginBottom: 10,
+    color: "#222",
+  },
+
+  resultInfo: {
+    fontSize: 15,
+    fontWeight: "900",
+    color: "#222",
+    marginBottom: 4,
+  },
+
+  resultDescription: {
     fontSize: 14,
     fontWeight: "800",
+    color: "#222",
+    marginTop: 8,
+    lineHeight: 20,
   },
 
   button: {
