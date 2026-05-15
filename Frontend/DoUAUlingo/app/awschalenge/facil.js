@@ -355,27 +355,42 @@ export default function ChallengeScreen() {
               : "Você precisa atingir pelo menos 75% para concluir este módulo."}
           </Text>
         </View>
+
+        
       )}
 
-      <TouchableOpacity
-        disabled={!allAnswered || submitted}
-        style={[
-          styles.button,
-          (!allAnswered || submitted) && styles.disabledButton,
-        ]}
-        onPress={submitChallenge}
-      >
-        <Text style={styles.buttonText}>
-          {submitted
-            ? "AVALIAÇÃO ENVIADA"
-            : allAnswered
-            ? "ENVIAR RESPOSTAS"
-            : "RESPONDA TODAS AS QUESTÕES"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
+     <TouchableOpacity
+  disabled={!allAnswered || submitted}
+  style={[
+    styles.button,
+    (!allAnswered || submitted) && styles.disabledButton,
+  ]}
+  onPress={submitChallenge}
+>
+  <Text style={styles.buttonText}>
+    {submitted
+      ? "AVALIAÇÃO ENVIADA"
+      : allAnswered
+      ? "ENVIAR RESPOSTAS"
+      : "RESPONDA TODAS AS QUESTÕES"}
+  </Text>
+</TouchableOpacity>
+
+{submitted && (
+  <TouchableOpacity
+    style={styles.backBottomButton}
+    onPress={() => router.replace("/(tabs)/dashboard")}
+  >
+    <Text style={styles.backBottomText}>
+      ← Voltar ao Dashboard
+    </Text>
+  </TouchableOpacity>
+)}
+
+</ScrollView>
+);
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -647,4 +662,19 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     marginBottom: 20,
   },
+  backBottomButton: {
+  marginTop: 16,
+  backgroundColor: "#ff0000",
+  paddingVertical: 16,
+  borderRadius: 18,
+  alignItems: "center",
+  borderBottomWidth: 5,
+  borderBottomColor: "#111",
+},
+
+backBottomText: {
+  color: "#fff",
+  fontSize: 14,
+  fontWeight: "900",
+},
 });
